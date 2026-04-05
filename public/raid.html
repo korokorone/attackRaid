@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Raid Detail</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      h2 {
+        margin-top: 30px;
+        margin-bottom: 10px;
+      }
+
+      .section {
+        background: #1e293b;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #334155;
+      }
+
+      .item:last-child {
+        border-bottom: none;
+      }
+
+      .role {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 6px;
+        margin-left: 6px;
+      }
+
+      .dealer {
+        background: #2563eb;
+      }
+
+      .supporter {
+        background: #16a34a;
+      }
+
+      button {
+        background: #6366f1;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+
+      button.cancel {
+        background: #dc2626;
+      }
+
+      button:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="title">Raid</h1>
+
+    <div class="section">
+      <h2>참가자</h2>
+      <div id="participants"></div>
+    </div>
+
+    <div class="section">
+      <h2>내 캐릭터</h2>
+      <div id="myChars"></div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const raidId = params.get("raidId");
+      const userId = params.get("userId");
+      const guildId = params.get("guildId");
+
+      // 🔥 1. 레이드 상세
+      async function loadRaid() {
+        const res = await fetch(`/raid/${raidId}`);
+        const data = await res.json();
+
+        document.getElementById("title").innerText = data.raid_name;
+
+        const container = document.getElementById("participants");
+        container.innerHTML = "";
+
+        data.participants.forEach((p) => {
+          const div = document.createElement("div");
+          div.className = "item";
+
+          div.innerHTML = `
+      <div>
+        ${p.character}
+        <span class="role ${p.role}">
+          ${p.role}
+        </span>
+      </div>
+
+      ${
+        p.userId === userId
+          ? `<button class="cancel" onclick="leave('${p.character}')">취소</button>`
+          : ""
+      }
+    `;
+
+          container.appendChild(div);
+        });
+      }
+
+      // 🔥 2. 내 캐릭터
+      async function loadMyChars() {
+        const res = await fetch(
+          `http://localhost:3000/characters?userId=${userId}&serverId=${guildId}`,
+        );
+        const data = await res.json();
+
+        const container = document.getElementById("myChars");
+        container.innerHTML = "";
+
+        data.forEach((c) => {
+          const div = document.createElement("div");
+          div.className = "item";
+
+          div.innerHTML = `
+      <div>${c.name}</div>
+      <div>
+        <button onclick="join('${c.name}', 'dealer')">딜러</button>
+        <button onclick="join('${c.name}', 'supporter')">서폿</button>
+      </div>
+    `;
+
+          container.appendChild(div);
+        });
+      }
+
+      // 🔥 참가
+      async function join(character, role) {
+        await fetch("http://localhost:3000/raid/join", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            raidId,
+            characterName: character,
+            role,
+            userId,
+            serverId: guildId,
+          }),
+        });
+
+        loadRaid();
+      }
+
+      // 🔥 취소
+      async function leave(character) {
+        await fetch("/raid/leave", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            raidId,
+            characterName: character,
+            userId,
+          }),
+        });
+
+        loadRaid();
+      }
+
+      // 실행
+      loadRaid();
+      loadMyChars();
+    </script>
+  </body>
+</html>

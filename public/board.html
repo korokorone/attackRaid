@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>LostArk Raid</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .raid-name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .meta {
+        font-size: 14px;
+        color: #cbd5f5;
+        margin-bottom: 6px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      .hard {
+        background: #dc2626;
+      }
+
+      .normal {
+        background: #2563eb;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>🔥 LostArk Raid Board</h1>
+
+    <div class="container" id="raidList"></div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+      const guildId = params.get("guildId");
+
+      fetch("http://localhost:3000/raids")
+        .then((res) => res.json())
+        .then((data) => {
+          const container = document.getElementById("raidList");
+
+          data.forEach((r) => {
+            const difficultyClass = r.difficulty === "hard" ? "hard" : "normal";
+
+            const card = `
+            <div class="card"
+              onclick="goDetail('${r.id}')"
+              style="cursor:pointer"
+            >
+              <div class="raid-name">${r.raid_name}</div>
+              
+              <div class="meta">📅 ${r.date}</div>
+              <div class="meta">⏰ ${r.hour}:${r.minute}</div>
+              <div class="meta">👤 ${r.created_user}</div>
+              <div class="meta">🖥️ ${r.server_id}</div>
+
+              <div class="badge ${difficultyClass}">
+                ${r.difficulty}
+              </div>
+            </div>
+          `;
+
+            container.innerHTML += card;
+          });
+        });
+
+      function goDetail(raidId) {
+        window.location.href = `/raid.html?raidId=${raidId}&userId=${userId}&guildId=${guildId}`;
+      }
+    </script>
+  </body>
+</html>
