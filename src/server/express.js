@@ -100,7 +100,7 @@ function startServer() {
   app.get("/login", (req, res) => {
     const guildId = req.query.guildId;
 
-    const url = `https://discord.com/oauth2/authorize?client_id=1487742220131110912&response_type=code&redirect_uri=https%3A%2F%2Fattackraid.onrender.com&scope=guilds+connections+identify+guilds.join+guilds.members.read&state=${guildId}`;
+    const url = `https://discord.com/oauth2/authorize?client_id=1487742220131110912&response_type=code&redirect_uri=https%3A%2F%2Fattackraid.onrender.com%2Fcallback&scope=guilds+connections+identify+guilds.join+guilds.members.read&state=${guildId}`;
     res.redirect(url);
   });
 
