@@ -132,7 +132,7 @@
       // 🔥 2. 내 캐릭터
       async function loadMyChars() {
         const res = await fetch(
-          `http://localhost:3000/characters?userId=${userId}&serverId=${guildId}`,
+          `/characters?userId=${userId}&serverId=${guildId}`,
         );
         const data = await res.json();
 
@@ -157,7 +157,7 @@
 
       // 🔥 참가
       async function join(character, role) {
-        await fetch("http://localhost:3000/raid/join", {
+        await fetch("/raid/join", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

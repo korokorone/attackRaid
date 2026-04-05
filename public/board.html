@@ -76,7 +76,7 @@
       const userId = params.get("userId");
       const guildId = params.get("guildId");
 
-      fetch("http://localhost:3000/raids")
+      fetch("/raids")
         .then((res) => res.json())
         .then((data) => {
           const container = document.getElementById("raidList");
